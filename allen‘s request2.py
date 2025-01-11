@@ -5,7 +5,7 @@ import requests
 from datetime import datetime
 import os
 
-# 查找可能包含更新时间的标签
+# Look for tags that may contain update times
 def find_potential_update_time(url):
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
@@ -13,17 +13,17 @@ def find_potential_update_time(url):
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # 查找<meta>标签中可能包含更新时间的信息
+    # Look for information in the <meta> tag that may contain update times
     meta_time = soup.find('meta', {'name': 'last-modified'})
     if meta_time:
         print(f"Meta last-modified: {meta_time.get('content')}")
 
-    # 查找<time>标签中可能包含更新时间的信息
+    # Look for information in the <time> tag that may contain the update time
     time_tags = soup.find_all('time')
     for time_tag in time_tags:
         print(f"Time tag: {time_tag.get_text(strip=True)}")
 
-    # 查找<div>和<span>标签中可能包含更新时间的信息
+    # Look for information in the <div> and <span> tags that may contain update times
     div_tags = soup.find_all('div')
     for div in div_tags:
         if 'update' in div.get_text().lower():
@@ -34,9 +34,9 @@ def find_potential_update_time(url):
         if 'update' in span.get_text().lower():
             print(f"Span with update text: {span.get_text(strip=True)}")
 
-# 获取网页内容哈希值
+# Gets the hash value of the web content
 def get_content_hash(url):
-    """获取网页内容的哈希值"""
+    """Gets the hash of the web content"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     }
@@ -44,7 +44,7 @@ def get_content_hash(url):
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             content = response.content
-            return hashlib.md5(content).hexdigest()  # 返回内容的MD5哈希值
+            return hashlib.md5(content).hexdigest()  # Returns the MD5 hash value of the content
         else:
             print(f"Failed to access {url}. Status code: {response.status_code}")
             return None
@@ -52,7 +52,7 @@ def get_content_hash(url):
         print(f"Error accessing {url}: {e}")
         return None
 
-# 读取之前的哈希值
+# Read the previous hash value
 def read_previous_hashes(filename):
     """Reads previous hashes from a file and returns a dictionary."""
     try:
@@ -61,14 +61,14 @@ def read_previous_hashes(filename):
     except FileNotFoundError:
         return {}
 
-# 写入当前哈希值到文件
+# Writes the current hash value to the file
 def write_hashes(filename, hashes):
     """Writes the current hash dictionary to a file."""
     with open(filename, "w") as file:
         for url, hash_value in hashes.items():
             file.write(f"{url} {hash_value}\n")
 
-# 主函数
+# main function
 def main():
     """Main function to check updates on websites and handle file operations."""
     urls = [
@@ -211,7 +211,7 @@ def main():
     filename = "hashes.txt"
     previous_hash = read_previous_hashes(filename)
     update_records = []
-    first_run = not os.path.exists(filename)  # 判断是否是第一次运行
+    first_run = not os.path.exists(filename)  # Check whether it is the first run
     current_hashes = {}
 
     for url in urls:
@@ -220,7 +220,7 @@ def main():
             if url in previous_hash and previous_hash[url] != current_hash:
                 response = requests.get(url)
                 soup = BeautifulSoup(response.content, 'html.parser')
-                actual_update_time = find_potential_update_time(url)  # 获取实际更新时间
+                actual_update_time = find_potential_update_time(url)  # Get the actual update time
                 if actual_update_time:
                     print(f"Web page {url} has been updated at {actual_update_time}.")
                     update_records.append({'URL': url, 'Update Time': actual_update_time})
@@ -235,10 +235,10 @@ def main():
 
     write_hashes(filename, current_hashes)
 
-    # 将更新记录导出到 Excel 文件
+    # Export the update record to an Excel file
     if update_records:
         df = pd.DataFrame(update_records)
-        df.to_excel('website_updates.xlsx', index=False)  # 保存到 Excel 文件
+        df.to_excel('website_updates.xlsx', index=False) 
         print("Updates exported to Excel.")
     else:
         print("No updates found.")
